@@ -2,7 +2,7 @@
 ## 这个是干什么的
 将如下文字内容  
 `"<#F37C2A><font Helvetica><30>【世】<#3AB5B3><underLine true>寒江孤叶<underLine false><#F8F4D7>:HelloWorld"`  
-生成如图所示样式的RichText(**支持图片以及闪烁旋转和其他自定义效果、控件**)  
+生成如图所示样式的RichText(**支持图片以及闪烁、旋转和其他自定义的效果、控件**)  
   
  <img src="https://raw.githubusercontent.com/ArcherPeng/RichTextEXWithUnderLineAndOutLine/master/06C0BE26-17B5-4753-9729-D909E2099FB2.png" width = "439" height = "53" alt="示例图片" align=center />
 ## 关于它
@@ -20,7 +20,7 @@ RichTextEx使用起来非常简单，只要将RichTextEx.lua复制到你的项�
 使用RichText来创建一个富文本是非常简单的： 
 
   	local txt = RichTextEx:create() -- 或 RichTextEx:create(26, cc.c3b(10, 10, 10))
-  	txt:setText("<#333>你\t好<#800>\n\t&lt;世界&gt;<img temp.png><img_50*50 temp.png><33bad_fmt<#555><64>Big<#077><18>SMALL<")
+  	txt:setText("<outLine 5><underLine true><#EFB65C><font res/fonts/pw.ttf><24>您的元宝和银券不足请<#FF0000><35>充值<#EFB65C><24>,或领取抽取元宝奖励！")
   	-- 多行模式要同时设置 ignoreContentAdaptWithSize(false) 和 contentSize
   	txt:setMultiLineMode(true)	-- 这行其实就是 ignoreContentAdaptWithSize(false)
   	txt:setContentSize(200, 400)
@@ -37,7 +37,7 @@ RichTextEx使用起来非常简单，只要将RichTextEx.lua复制到你的项�
   	<img_32*32 fname> 	= 指定大小的图片
   	<+2> <-2> <*2> </2> = 当前字体大小 +-*/
   	<!>					= 颜色、字体和字体大小恢复默认
-  	\n \t 				= 换行 和 tab，可能暂时实现得不是很好 ***最好不要用*** **如果需要换行你可以创建多个RichText然后依次放好**
+  	\n \t 				= 换行 和 tab，可能暂时实现得不是很好 最好不要用 如果需要换行你可以创建多个RichText然后依次放好
   	<outLine 1>			= 设置1像素描边，只支持TTF字体
   	<underLine true>	= 是否开启下划线
 ###RichTextEx的示例选项 (在 RichTextEx.defaultCb 中提供)   
@@ -258,8 +258,8 @@ int lua_cocos2dx_ui_RichElementText_create(lua_State* tolua_S)
     }  
 重新编译一下项目，然后就可以在项目里用了  
 ##下个版本要更新的内容  
-1.继续修改Cocos2d-x的RichText的源码，使其更好的支持tab和换行
-2.加入可点击的文字，以及点击后变色
-3.为系统字体加入描边(判断为系统字体时，描边采用阴影替代)
+1.继续修改Cocos2d-x的RichText的源码，使其更好的支持tab和换行  
+2.加入可点击的文字，以及点击后变色  
+3.为系统字体加入描边(判断为系统字体时，描边采用阴影替代)  
 下划线实现的非常拙略，如果你有更好的方法一定要告诉我。  
 ***欢迎交流QQ:446569365***
