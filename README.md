@@ -1,6 +1,6 @@
 # RichTextEX支持下划线和描边的版本
 ## 这个是干什么的
-将如下文字内容"<#F37C2A><font Helvetica><30>【世】<#3AB5B3><underLine true>寒江孤叶<underLine false><#F8F4D7>:HelloWorld"
+将如下文字内容`"<#F37C2A><font Helvetica><30>【世】<#3AB5B3><underLine true>寒江孤叶<underLine false><#F8F4D7>:HelloWorld"`
 生成如图所示样式的RichText(**支持图片以及闪烁旋转和其他自定义效果、控件**)
 
 ## 如何使用它
