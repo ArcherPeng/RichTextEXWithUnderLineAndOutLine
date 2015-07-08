@@ -1,13 +1,14 @@
-# RichTextEXWithUnderLineAndOutLine
+# RichTextEX支持下划线和描边的版本
 这个是LUA版本的，CPP版本的没写，欢迎移植CPP和JS版本  
 LUA文件是用一个别人写的文件修改的（添加一些功能，修复几个BUG……话说之前跑都跑不起来啊亲……什么鬼）   
 另外抱歉，找不到他的Github链接了……  
 ***·使用说明看LUA文件里边说的***  
-
+*·TTF字体支持描边，系统字体是不支持的*
 ## 为了支持描边和下划线还要修改一下Cocos的源码  
 UIRichText.h和UIRichText.cpp放到项目源码目录 替换原来的  
 路径:frameworks/cocos2d-x/cocos/ui  
 另外修改toLua文件  
+(修改内容主要三个方面：加入下划线设置，加入描边设置，RichText可以自动更改高度了)
 frameworks/cocos2d-x/cocos/scripting/lua-bindings/auto/lua_cocos2dx_ui_auto.cpp  
 18878行左右能看到两个函数  
 int lua_cocos2dx_ui_RichElementText_init(lua_State* tolua_S)  
@@ -185,3 +186,6 @@ int lua_cocos2dx_ui_RichElementText_create(lua_State* tolua_S)
         return 0;
     }  
 重新编译一下项目，然后就可以在项目里用了  
+
+另外，下划线实现的非常拙略，如果你有更好的方法一定要告诉我。
+欢迎交流QQ:446569365
