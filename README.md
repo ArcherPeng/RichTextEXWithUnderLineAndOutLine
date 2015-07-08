@@ -1,9 +1,15 @@
 # RichTextEX支持下划线和描边的版本
+## 这个是干什么的
+将如下文字内容"<#F37C2A><font Helvetica><30>【世】<#3AB5B3><underLine true>寒江孤叶<underLine false><#F8F4D7>:HelloWorld"
+生成如图所示样式的RichText(**支持图片以及闪烁旋转和其他自定义效果、控件**)
+
+## 如何使用它
+***直接将他放进项目源码目录中，在项目中require就可以了。***
 这个是LUA版本的，CPP版本的没写，欢迎移植CPP和JS版本  
 LUA文件是用一个别人写的文件修改的（添加一些功能，修复几个BUG……话说之前跑都跑不起来啊亲……什么鬼）   
 另外抱歉，找不到他的Github链接了……  
 ***·使用说明看LUA文件里边说的***  
-*·TTF字体支持描边，系统字体是不支持的*
+***·****TTF字体支持描边，系统字体是不支持的*
 ## 为了支持描边和下划线还要修改一下Cocos的源码  
 UIRichText.h和UIRichText.cpp放到项目源码目录 替换原来的  
 路径:frameworks/cocos2d-x/cocos/ui  
