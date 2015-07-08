@@ -1,5 +1,4 @@
-# RichTextEX支持下划线和描边的版本
-# 用于Cocos2d-x 
+# RichTextEX支持下划线和描边的版本(用于Cocos2d-x)  
 ## 这个是干什么的
 将如下文字内容  
 `"<#F37C2A><font Helvetica><30>【世】<#3AB5B3><underLine true>寒江孤叶<underLine false><#F8F4D7>:HelloWorld"`  
