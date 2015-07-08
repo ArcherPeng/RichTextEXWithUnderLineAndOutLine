@@ -5,18 +5,81 @@
 生成如图所示样式的RichText(**支持图片以及闪烁旋转和其他自定义效果、控件**)  
   
  <img src="https://raw.githubusercontent.com/ArcherPeng/RichTextEXWithUnderLineAndOutLine/master/06C0BE26-17B5-4753-9729-D909E2099FB2.png" width = "439" height = "53" alt="示例图片" align=center />
-## 如何使用它
-***直接将他放进项目源码目录中，在项目中require就可以了。***  
+## 关于它
 这个是LUA版本的，CPP版本的没写，欢迎移植CPP和JS版本  
 LUA文件是用一个别人写的文件修改的（添加一些功能，修复几个BUG……话说之前跑都跑不起来啊亲……什么鬼）   
 另外抱歉，找不到他的Github链接了……  
-***·使用说明看LUA文件里边说的***  
 ***·****TTF字体支持描边，系统字体是不支持的*
-## 为了支持描边和下划线还要修改一下Cocos的源码  
+## 使用说明  
+RichTextEx使用起来非常简单，只要将RichTextEx.lua复制到你的项目目录中，并require它就可以了  
+比如这样：  
+
+    APUtils = APUtils or {}  
+    APUtils.RichTextEx = APUtils.RichTextEx or require("APUtils/gui/RichTextEx.lua")
+
+使用RichText来创建一个富文本是非常简单的： 
+
+  	local txt = RichTextEx:create() -- 或 RichTextEx:create(26, cc.c3b(10, 10, 10))
+  	txt:setText("<#333>你\t好<#800>\n\t&lt;世界&gt;<img temp.png><img_50*50 temp.png><33bad_fmt<#555><64>Big<#077><18>SMALL<")
+  	-- 多行模式要同时设置 ignoreContentAdaptWithSize(false) 和 contentSize
+  	txt:setMultiLineMode(true)	-- 这行其实就是 ignoreContentAdaptWithSize(false)
+  	txt:setContentSize(200, 400)
+  	someNode:addChild(txt)
+	
+***如果字符串是由用户输入的话，建议调用`RichTextEx.htmlUnicode("<ABC>")`将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误***  
+**在生成字符串之前会自动调用RichTextEx.htmlDecode,如果你自定义了用于显示文字内容的控件，请记得调用它，以对字符串进行解码**   
+###RichTextEx的基本选项
+
+    <#F00> = <#FF0000> 	= 文字颜色
+  	<32>				= 字体大小
+  	<font Arial>		= 文字字体 支持TTF
+  	<img filename>		= 图片（filename 可以是已经在 SpriteFrameCache 里的 key，或磁盘文件）
+  	<img_32*32 fname> 	= 指定大小的图片
+  	<+2> <-2> <*2> </2> = 当前字体大小 +-*/
+  	<!>					= 颜色、字体和字体大小恢复默认
+  	\n \t 				= 换行 和 tab，可能暂时实现得不是很好 ***最好不要用*** **如果需要换行你可以创建多个RichText然后依次放好**
+  	<outLine 1>			= 设置1像素描边，只支持TTF字体
+  	<underLine true>	= 是否开启下划线
+###RichTextEx的示例选项 (在 RichTextEx.defaultCb 中提供)   
+  	<blink 文字>		= （动画）闪烁那些文字
+  	<rotate 文字>		= （动画）旋转那些文字
+  	<scale 文字>		= （动画）缩放那些文字
+  	(但如果你做了 setText(t, callback) 除非你在 callback 主动调用 defaultCb，否则以上选项会被忽略)	
+	
+###你可以对功能进行扩展  
+	`<img_w*h http://path/image> 例如从网络下载图片`
+	
+同时支持自定义特殊语法，加入 callback 回调就可，如  
+	
+  	txt:setText("XXXXX <aaaa haha> <bbbb> <CCCC> xxx", function(text, sender) -- 第二个参数 sender 可选
+  		-- 对每一个自定义的 <***> 都会调用此 callback
+  		-- text 就等于 *** (不含<>)
+  		-- 简单的返回一个 Node 的子实例就可，如
+  		-- 如果接收第二个参数 sender，就可获取当前文字大小、颜色: sender._fontSize、sender._textColor
+  		
+  		if string.sub(text, 1, 4) == "aaaa" then
+  			return ccui.Text:create("aaa111" .. string.sub(text, 6)), "", 32)
+  			--这里如果为了代码的健壮性最好加入self:htmlDecode
+  			--return ccui.Text:create(self:htmlDecode("aaa111" .. string.sub(text, 6))), "", 32)
+  		elseif text == "bbbb" then
+  			-- 用当前文字大小和颜色
+  			local lbl = ccui.Text:create("bbb111", "", sender._fontSize)
+  			lbl:setTextColor(sender._textColor)
+  			return lbl
+  		elseif string.sub(text, 1, 4) == "CCCC" then
+  			local img = ccui.ImageView:create(....)
+  			img:setScale(...)
+  			img:runAction(...)
+  			return img
+  		end
+  	end)
+
+## 你还要做什么  
+***为了支持描边和下划线还要修改一下Cocos的源码***  
 UIRichText.h和UIRichText.cpp放到项目源码目录 替换原来的  
 路径:frameworks/cocos2d-x/cocos/ui  
-另外修改toLua文件  
-(修改内容主要三个方面：加入下划线设置，加入描边设置，RichText可以自动更改高度了)
+(修改内容主要三个方面：加入下划线设置，加入描边设置，RichText可以自动更改高度了)  
+另外还需要修改toLua文件  
 frameworks/cocos2d-x/cocos/scripting/lua-bindings/auto/lua_cocos2dx_ui_auto.cpp  
 18878行左右能看到两个函数  
 int lua_cocos2dx_ui_RichElementText_init(lua_State* tolua_S)  
@@ -194,6 +257,9 @@ int lua_cocos2dx_ui_RichElementText_create(lua_State* tolua_S)
         return 0;
     }  
 重新编译一下项目，然后就可以在项目里用了  
-
-另外，下划线实现的非常拙略，如果你有更好的方法一定要告诉我。
-欢迎交流QQ:446569365
+##下个版本要更新的内容  
+1.继续修改Cocos2d-x的RichText的源码，使其更好的支持tab和换行
+2.加入可点击的文字，以及点击后变色
+3.为系统字体加入描边(判断为系统字体时，描边采用阴影替代)
+下划线实现的非常拙略，如果你有更好的方法一定要告诉我。  
+***欢迎交流QQ:446569365***
