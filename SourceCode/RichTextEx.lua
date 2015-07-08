@@ -15,6 +15,9 @@
 	
 	addChild(txt)
 	
+	如果字符串是由用户输入的话，建议调用RichTextEx.htmlUnicode("<ABC>")将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误
+	在生成字符串之前会自动调用RichTextEx.htmlDecode,如果你自定义了字符串创建，请记得调用这个，以解码
+
 基本选项是
 	<#F00> = <#FF0000> 	= 文字颜色
 	<32>				= 字体大小
@@ -49,6 +52,8 @@ TODO 或自己自行可扩展
 		
 		if string.sub(text, 1, 4) == "aaaa" then
 			return ccui.Text:create("aaa111" .. string.sub(text, 6)), "", 32)
+			--这里如果为了代码的健壮性最好加入self:htmlDecode
+			--return ccui.Text:create(self:htmlDecode("aaa111" .. string.sub(text, 6))), "", 32)
 		elseif text == "bbbb" then
 			-- 用当前文字大小和颜色
 			local lbl = ccui.Text:create("bbb111", "", sender._fontSize)
@@ -140,6 +145,10 @@ function _M:ctor(fontSize, textColor)
 	self._fontSize		= self._fontSizeDef
 	self._textColor		= self._textColorDef
 	self._elements		= {}
+	self._textFont 		= ""
+	self._outLine 		= 0
+	self._underLine 	= false
+	
 end
 
 --/////////////////////////////////////////////////////////////////////////////
@@ -156,17 +165,17 @@ function _M.defaultCb(text, sender)
 	local SCALE		= "scale "
 	
 	if str_sub(text, 1, #BLINK) == BLINK then
-		local lbl = ccui.Text:create(str_fix(str_sub(text, #BLINK + 1)), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #BLINK + 1))), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.Blink:create(10, 10)))
 		return lbl
 	elseif str_sub(text, 1, #ROTATE) == ROTATE then
-		local lbl = ccui.Text:create(str_fix(str_sub(text, #ROTATE + 1)), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #ROTATE + 1))), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.RotateBy:create(0.1, 5)))
 		return lbl
 	elseif str_sub(text, 1, #SCALE) == SCALE then
-		local lbl = ccui.Text:create(str_fix(str_sub(text, #SCALE + 1)), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #SCALE + 1))), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.Sequence:create(cc.ScaleTo:create(1.0, 0.1), cc.ScaleTo:create(1.0, 1.0))))
 		return lbl
@@ -253,7 +262,7 @@ function _M:setText(text, callback)
 		if c == P_BEG then	-- <
 			if (not b) and (i > p) then
 				str = str_sub(text, p, i - 1)
-				obj = ccui.RichElementText:create(0, self._textColor, 255, str_fix(str), self._textFont, self._fontSize,self._outLine,self._underLine)
+				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
 				self:pushBackElement(obj)
 				self._elements[#self._elements + 1] = obj
 			end
@@ -317,7 +326,7 @@ function _M:setText(text, callback)
 		elseif c == C_LN or c == C_TAB then
 			if (not b) and (i > p) then
 				str = str_sub(text, p, i - 1)
-				obj = ccui.RichElementText:create(0, self._textColor, 255, str_fix(str), self._textFont, self._fontSize,self._outLine,self._underLine)
+				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
 				self:pushBackElement(obj)
 				self._elements[#self._elements + 1] = obj
 			end
@@ -339,7 +348,7 @@ function _M:setText(text, callback)
 
 	if (not b) and (p <= len) then
 		str = str_sub(text, p)
-		obj = ccui.RichElementText:create(0, self._textColor, 255, str_fix(str), self._textFont, self._fontSize,self._outLine,self._underLine)
+		obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
 		self:pushBackElement(obj)
 		self._elements[#self._elements + 1] = obj
 	end
@@ -349,10 +358,65 @@ end
 function _M:setDefaultFont(font)
 	self._textFont = font
 end
+
+
+--[[--
+
+将特殊字符转为 HTML 转义符
+
+~~~ lua
+
+print(RichTextEx.htmlUnicode("<ABC>"))
+-- 输出 &lt;ABC&gt;
+
+~~~
+
+@param string input 输入字符串
+
+@return string 转换结果
+
+
+本来想直接把触控的function里边的算法扳过来，发现不对，也不知道哪个二货写的算法。也许是我看的哪个function版本太低了
+对于<>  编码成 &lt; &gt; 这个很正常，然后他又把&gt;的&给编码成&amp;
+<ABC> 期望的编码结果  "&lt;ABC&gt;"  最终让他给编成了 "&amp;lt;ABC&amp;gt;" 解析时候就出错了。。。。
+]]
+
+function _M.htmlUnicode(self,input)
+	if not input then input = self end
+	input = string.gsub(input,"&", "&amp;") 
+    input = string.gsub(input,"\"", "&quot;")
+    input = string.gsub(input,"'", "&#039;")
+    input = string.gsub(input,"<", "&lt;")
+    input = string.gsub(input,">", "&gt;")
+    return input
+end
+
+--[[--
+
+将 HTML 转义符还原为特殊字符，功能与 string.htmlUnicode() 正好相反
+
+~~~ lua
+
+print(RichTextEx.htmlDecode("&lt;ABC&gt;"))
+-- 输出 <ABC>
+
+~~~
+
+@param string input 输入字符串
+
+@return string 转换结果
+
+]]
+function _M.htmlDecode(self,input)
+	if not input then input = self end
+    input = string.gsub(input,"&gt;",">")
+    input = string.gsub(input,"&lt;","<")
+    input = string.gsub(input,"&#039;","'")
+    input = string.gsub(input,"&quot;","\"")
+    input = string.gsub(input,"&amp;","&")
+    return input
+end
 function _M:create(...)
-	self._textFont = ""
-	self._outLine = 0
-	self._underLine = false
 	local richTextEx = _M.new(...)
     return richTextEx
 end
