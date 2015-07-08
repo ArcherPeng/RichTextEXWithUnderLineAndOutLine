@@ -222,6 +222,16 @@ void RichText::formatText()
                         else
                         {
                             elementRenderer = Label::createWithSystemFont(elmtText->_text.c_str(), elmtText->_fontName, elmtText->_fontSize);
+                            if(elmtText->_underLine)
+                            {
+                                auto labelElement = dynamic_cast<Label*>(elementRenderer);
+                                auto sp = Sprite::createWithTexture(nullptr, Rect(0, 0, labelElement->getBoundingBox().size.width, elmtText->_fontSize/20));
+                                
+                                sp->setColor(elmtText->_color);
+                                sp->setAnchorPoint(Vec2::ZERO);
+                                sp->setPosition(Vec2::ZERO);
+                                labelElement->setUserData((void*)sp);
+                            }
                         }
                         break;
                     }
@@ -312,6 +322,16 @@ void RichText::handleTextRenderer(const std::string& text, const std::string& fo
     else
     {
         textRenderer = Label::createWithSystemFont(text, fontName, fontSize);
+        if(underline)
+        {
+            auto labelElement = dynamic_cast<Label*>(textRenderer);
+            auto sp = Sprite::createWithTexture(nullptr, Rect(0, 0, labelElement->getBoundingBox().size.width, fontSize/20));
+            
+            sp->setColor(color);
+            sp->setAnchorPoint(Vec2::ZERO);
+            sp->setPosition(Vec2::ZERO);
+            labelElement->setUserData((void*)sp);
+        }
     }
     float textRendererWidth = textRenderer->getContentSize().width;
     _leftSpaceWidth -= textRendererWidth;
@@ -351,6 +371,16 @@ void RichText::handleTextRenderer(const std::string& text, const std::string& fo
             else
             {
                 leftRenderer = Label::createWithSystemFont(Helper::getSubStringOfUTF8String(leftWords, 0, leftLength), fontName, fontSize);
+                if(underline)
+                {
+                    auto labelElement = dynamic_cast<Label*>(textRenderer);
+                    auto sp = Sprite::createWithTexture(nullptr, Rect(0, 0, labelElement->getBoundingBox().size.width, fontSize/20));
+                    
+                    sp->setColor(color);
+                    sp->setAnchorPoint(Vec2::ZERO);
+                    sp->setPosition(Vec2::ZERO);
+                    labelElement->setUserData((void*)sp);
+                }
             }
             if (leftRenderer)
             {
