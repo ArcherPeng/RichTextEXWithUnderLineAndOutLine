@@ -8,14 +8,12 @@
 	
 	local txt = RichTextEx:create() -- 或 RichTextEx:create(26, cc.c3b(10, 10, 10))
 	txt:setText("<#333>你\t好<#800>\n\t&lt;世界&gt;<img temp.png><img_50*50 temp.png><33bad_fmt<#555><64>Big<#077><18>SMALL<")
-	
 	-- 多行模式要同时设置 ignoreContentAdaptWithSize(false) 和 contentSize
 	txt:setMultiLineMode(true)	-- 这行其实就是 ignoreContentAdaptWithSize(false)
 	txt:setContentSize(200, 400)
-	
 	addChild(txt)
 	
-	如果字符串是由用户输入的话，建议调用RichTextEx.htmlUnicode("<ABC>")将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误
+	如果字符串是由用户输入的话，建议调用RichTextEx.htmlEncode("<ABC>")将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误
 	在生成字符串之前会自动调用RichTextEx.htmlDecode,如果你自定义了字符串创建，请记得调用这个，以解码
 
 基本选项是
@@ -126,16 +124,16 @@ local function c3b_parse(s)
 end
 
 --------------------------------------------------------------------------------
-local _FIX = {
-	["&lt;"] = "<",
-	["&gt;"] = ">",
-}
-local function str_fix(s)
-	for k, v in pairs(_FIX) do
-		s = str_gsub(s, k, v)
-	end
-	return s
-end
+-- local _FIX = {
+-- 	["&lt;"] = "<",
+-- 	["&gt;"] = ">",
+-- }
+-- local function str_fix(s)
+-- 	for k, v in pairs(_FIX) do
+-- 		s = str_gsub(s, k, v)
+-- 	end
+-- 	return s
+-- end
 
 --/////////////////////////////////////////////////////////////////////////////
 function _M:ctor(fontSize, textColor)
@@ -165,17 +163,17 @@ function _M.defaultCb(text, sender)
 	local SCALE		= "scale "
 	
 	if str_sub(text, 1, #BLINK) == BLINK then
-		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #BLINK + 1))), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_sub(text, #BLINK + 1)), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.Blink:create(10, 10)))
 		return lbl
 	elseif str_sub(text, 1, #ROTATE) == ROTATE then
-		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #ROTATE + 1))), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_sub(text, #ROTATE + 1)), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.RotateBy:create(0.1, 5)))
 		return lbl
 	elseif str_sub(text, 1, #SCALE) == SCALE then
-		local lbl = ccui.Text:create(self:htmlDecode(str_fix(str_sub(text, #SCALE + 1))), "", sender._fontSize)
+		local lbl = ccui.Text:create(self:htmlDecode(str_sub(text, #SCALE + 1)), "", sender._fontSize)
 		lbl:setTextColor(c3b_to_c4b(sender._textColor))
 		lbl:runAction(cc.RepeatForever:create(cc.Sequence:create(cc.ScaleTo:create(1.0, 0.1), cc.ScaleTo:create(1.0, 1.0))))
 		return lbl
@@ -262,7 +260,7 @@ function _M:setText(text, callback)
 		if c == P_BEG then	-- <
 			if (not b) and (i > p) then
 				str = str_sub(text, p, i - 1)
-				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
+				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str), self._textFont, self._fontSize,self._outLine,self._underLine)
 				self:pushBackElement(obj)
 				self._elements[#self._elements + 1] = obj
 			end
@@ -326,7 +324,7 @@ function _M:setText(text, callback)
 		elseif c == C_LN or c == C_TAB then
 			if (not b) and (i > p) then
 				str = str_sub(text, p, i - 1)
-				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
+				obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str), self._textFont, self._fontSize,self._outLine,self._underLine)
 				self:pushBackElement(obj)
 				self._elements[#self._elements + 1] = obj
 			end
@@ -348,7 +346,7 @@ function _M:setText(text, callback)
 
 	if (not b) and (p <= len) then
 		str = str_sub(text, p)
-		obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str_fix(str)), self._textFont, self._fontSize,self._outLine,self._underLine)
+		obj = ccui.RichElementText:create(0, self._textColor, 255, self:htmlDecode(str), self._textFont, self._fontSize,self._outLine,self._underLine)
 		self:pushBackElement(obj)
 		self._elements[#self._elements + 1] = obj
 	end
@@ -366,7 +364,7 @@ end
 
 ~~~ lua
 
-print(RichTextEx.htmlUnicode("<ABC>"))
+print(RichTextEx.htmlEncode("<ABC>"))
 -- 输出 &lt;ABC&gt;
 
 ~~~
@@ -381,7 +379,7 @@ print(RichTextEx.htmlUnicode("<ABC>"))
 <ABC> 期望的编码结果  "&lt;ABC&gt;"  最终让他给编成了 "&amp;lt;ABC&amp;gt;" 解析时候就出错了。。。。
 ]]
 
-function _M.htmlUnicode(self,input)
+function _M.htmlEncode(self,input)
 	if not input then input = self end
 	input = string.gsub(input,"&", "&amp;") 
     input = string.gsub(input,"\"", "&quot;")
@@ -393,7 +391,7 @@ end
 
 --[[--
 
-将 HTML 转义符还原为特殊字符，功能与 string.htmlUnicode() 正好相反
+将 HTML 转义符还原为特殊字符，功能与 string.htmlEncode() 正好相反
 
 ~~~ lua
 
