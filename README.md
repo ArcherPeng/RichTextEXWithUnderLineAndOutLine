@@ -26,7 +26,7 @@ RichTextEx使用起来非常简单，只要将RichTextEx.lua复制到你的项�
   	txt:setContentSize(200, 400)
   	someNode:addChild(txt)
 	
-***如果字符串是由用户输入的话，建议调用`RichTextEx.htmlUnicode("<ABC>")`将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误***  
+***如果字符串是由用户输入的话，建议调用`RichTextEx.htmlEncode("<ABC>")`将用户输入内容编码一下，以避免用户输入关键字符导致无法预知的错误***  
 **在生成字符串之前会自动调用RichTextEx.htmlDecode,如果你自定义了用于显示文字内容的控件，请记得调用它，以对字符串进行解码**   
 ###RichTextEx的基本选项
 
